@@ -2,15 +2,19 @@ import type { CSSProperties } from "react";
 
 type Props = {
   text: string;
+  type?: "button" | "submit";
   size?: "large" | "midium" | "small";
   backgroundColor?: string;
+  isDisabled?: boolean;
   onClick?: () => void;
 };
 
 function Button({
   text,
+  type = "button",
   size = "midium",
   backgroundColor = "blue",
+  isDisabled = false,
   onClick,
 }: Props) {
   const buttonStyle: CSSProperties & Record<`--${string}`, string> = {
@@ -26,14 +30,15 @@ function Button({
     color: "white",
     border: "none",
     borderRadius: "4px",
-    cursor: "pointer",
   };
 
   return (
     <button
       style={buttonStyle}
+      type={type}
       onClick={onClick}
-      className="bg-(--btn-bg) transition-colors hover:bg-(--btn-bg-light) active:bg-(--btn-bg-light)"
+      disabled={isDisabled}
+      className="cursor-pointer bg-(--btn-bg) transition-[background-color,opacity] enabled:hover:bg-(--btn-bg-light) enabled:active:bg-(--btn-bg-light) disabled:cursor-not-allowed disabled:opacity-40"
     >
       {text}
     </button>
