@@ -1,4 +1,4 @@
-import { useId, type ComponentProps } from "react";
+import { useId, type ChangeEvent, type ComponentProps } from "react";
 
 type InputType =
   | "button"
@@ -29,12 +29,16 @@ type Props = Omit<ComponentProps<"input">, "type" | "required"> & {
   type?: InputType;
   placeholder?: string;
   isRequired?: boolean;
+  value?: string;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 
 function InputField({
   label,
   type = "text",
   isRequired = false,
+  value,
+  onChange,
   ...rest
 }: Props) {
   const id = useId();
@@ -57,6 +61,8 @@ function InputField({
         type={type}
         required={isRequired}
         {...rest}
+        value={value}
+        onChange={onChange}
         className="rounded-lg border border-zinc-700 bg-zinc-900 px-5 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/30"
       />
     </div>
