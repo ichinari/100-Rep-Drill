@@ -1,4 +1,10 @@
-import { useId, type ChangeEvent, type ComponentProps } from "react";
+import {
+  useId,
+  useState,
+  type ChangeEvent,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 
 type InputType =
   | "button"
@@ -25,6 +31,10 @@ type InputType =
   | "week";
 
 type Props = Omit<ComponentProps<"input">, "type" | "required"> & {
+  // テキスト入力: エラーメッセージ / チェックボックス: 規約などの本文
+  children?: ReactNode;
+  // エラーメッセージ（チェックボックスではこちらを使う）
+  error?: ReactNode;
   label: string;
   type?: InputType;
   placeholder?: string;
@@ -37,6 +47,8 @@ type Props = Omit<ComponentProps<"input">, "type" | "required"> & {
 };
 
 function InputField({
+  children,
+  error,
   label,
   type = "text",
   isRequired = false,
@@ -47,6 +59,10 @@ function InputField({
   ...rest
 }: Props) {
   const id = useId();
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const isPassword = type === "password";
+  const inputType = isPassword && isPasswordVisible ? "text" : type;
 
   const borderClass =
     isFocused === undefined
@@ -55,6 +71,49 @@ function InputField({
         ? "border-sky-400 ring-2 ring-sky-400/30"
         : "border-zinc-700";
 
+  const requiredBadge = isRequired && (
+    <span className="rounded bg-red-600 px-1.5 py-0.5 text-[10px] leading-none font-semibold text-white">
+      必須
+    </span>
+  );
+
+  const renderError = (message: ReactNode) =>
+    message && <p className="text-xs text-red-400">{message}</p>;
+
+  // チェックボックス（利用規約の同意など）は本文と同意欄を一体の枠で表示する
+  if (type === "checkbox") {
+    return (
+      <div className="flex w-full max-w-sm flex-col gap-1.5">
+        <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/60 text-left">
+          {children && (
+            <div className="max-h-32 overflow-y-auto border-b border-zinc-800 p-4 text-xs leading-relaxed text-zinc-400">
+              {children}
+            </div>
+          )}
+          <label
+            htmlFor={id}
+            className="flex cursor-pointer items-center gap-2.5 px-4 py-3 text-sm text-zinc-300 transition-colors hover:bg-zinc-800/40"
+          >
+            <input
+              id={id}
+              type="checkbox"
+              name={name}
+              required={isRequired}
+              {...rest}
+              onChange={onChange}
+              className="h-4 w-4 shrink-0 cursor-pointer accent-violet-500"
+            />
+            <span className="flex flex-1 items-center gap-2">
+              {label}
+              {requiredBadge}
+            </span>
+          </label>
+        </div>
+        {renderError(error)}
+      </div>
+    );
+  }
+
   return (
     <div className="flex w-full max-w-sm flex-col gap-1.5">
       <label
@@ -62,23 +121,71 @@ function InputField({
         className="flex items-center gap-2 text-sm font-medium text-zinc-300"
       >
         {label}
-        {isRequired && (
-          <span className="rounded bg-red-600 px-1.5 py-0.5 text-[10px] leading-none font-semibold text-white">
-            必須
-          </span>
-        )}
+        {requiredBadge}
       </label>
-      <input
-        id={id}
-        type={type}
-        name={name}
-        required={isRequired}
-        {...rest}
-        value={value}
-        onChange={onChange}
-        className={`rounded-lg border bg-zinc-900 px-5 py-2 text-sm text-zinc-100 transition-colors placeholder:text-zinc-500 focus:outline-none ${borderClass}`}
-      />
+      <div className="relative">
+        <input
+          id={id}
+          type={inputType}
+          name={name}
+          required={isRequired}
+          {...rest}
+          value={value}
+          onChange={onChange}
+          className={`w-full rounded-lg border bg-zinc-900 px-5 py-2 text-sm text-zinc-100 transition-colors placeholder:text-zinc-500 focus:outline-none ${
+            isPassword ? "pr-11" : ""
+          } ${borderClass}`}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setIsPasswordVisible((prev) => !prev)}
+            aria-label={
+              isPasswordVisible ? "パスワードを隠す" : "パスワードを表示"
+            }
+            aria-pressed={isPasswordVisible}
+            className="absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center rounded-r-lg text-zinc-500 transition-colors hover:text-zinc-200 focus-visible:text-zinc-200 focus-visible:outline-none"
+          >
+            {isPasswordVisible ? <EyeOffIcon /> : <EyeIcon />}
+          </button>
+        )}
+      </div>
+      {renderError(error ?? children)}
     </div>
+  );
+}
+
+const iconProps = {
+  width: 18,
+  height: 18,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  "aria-hidden": true,
+} as const;
+
+// 目のアイコン（非表示中に表示し、押すとパスワードを表示する）
+function EyeIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+// 斜線入りの目のアイコン（表示中に表示し、押すとパスワードを隠す）
+function EyeOffIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M10.7 5.1A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-2.2 3.2" />
+      <path d="M6.6 6.6C3.9 8.4 2 12 2 12s3.5 7 10 7a10.4 10.4 0 0 0 5.4-1.6" />
+      <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+      <path d="m2 2 20 20" />
+    </svg>
   );
 }
 
