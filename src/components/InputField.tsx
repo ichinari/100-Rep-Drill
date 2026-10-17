@@ -29,19 +29,31 @@ type Props = Omit<ComponentProps<"input">, "type" | "required"> & {
   type?: InputType;
   placeholder?: string;
   isRequired?: boolean;
+  name?: string;
   value?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  // 親でフォーカス状態を管理する場合に渡す（省略時は CSS の :focus で表示）
+  isFocused?: boolean;
 };
 
 function InputField({
   label,
   type = "text",
   isRequired = false,
+  name,
   value,
   onChange,
+  isFocused,
   ...rest
 }: Props) {
   const id = useId();
+
+  const borderClass =
+    isFocused === undefined
+      ? "border-zinc-700 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30"
+      : isFocused
+        ? "border-sky-400 ring-2 ring-sky-400/30"
+        : "border-zinc-700";
 
   return (
     <div className="flex w-full max-w-sm flex-col gap-1.5">
@@ -59,11 +71,12 @@ function InputField({
       <input
         id={id}
         type={type}
+        name={name}
         required={isRequired}
         {...rest}
         value={value}
         onChange={onChange}
-        className="rounded-lg border border-zinc-700 bg-zinc-900 px-5 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+        className={`rounded-lg border bg-zinc-900 px-5 py-2 text-sm text-zinc-100 transition-colors placeholder:text-zinc-500 focus:outline-none ${borderClass}`}
       />
     </div>
   );
