@@ -1,6 +1,6 @@
 type UserInfo = {
   name: string;
-  age: number;
+  age?: number;
   isActive: boolean;
 };
 
@@ -17,7 +17,9 @@ function UserCard({ userInfo }: Props) {
       </div>
       <div className="min-w-0 flex-1 space-y-1">
         <p className="truncate font-semibold text-zinc-100">{userInfo.name}</p>
-        <p className="text-sm text-zinc-400">{userInfo.age} 歳</p>
+        {userInfo.age !== undefined && (
+          <p className="text-sm text-zinc-400">{userInfo.age} 歳</p>
+        )}
       </div>
       <span
         className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
