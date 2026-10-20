@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { findProblem, problems } from "../problems";
 import { paths } from "../routes/paths";
+import ProgressBar from "@components/ProgressBar";
 
 const TOTAL = 100;
 const BLOCK_SIZE = 10;
@@ -10,17 +11,6 @@ const blocks = Array.from({ length: TOTAL / BLOCK_SIZE }, (_, i) => {
   const numbers = Array.from({ length: BLOCK_SIZE }, (_, j) => start + j);
   return { start, end: start + BLOCK_SIZE - 1, numbers };
 });
-
-function ProgressBar({ value, max }: { value: number; max: number }) {
-  return (
-    <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
-      <div
-        className="h-full rounded-full bg-linear-to-r from-indigo-500 via-violet-500 to-sky-400 transition-[width] duration-700"
-        style={{ width: `${(value / max) * 100}%` }}
-      />
-    </div>
-  );
-}
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
