@@ -35,15 +35,18 @@ type Props = Omit<ComponentProps<"input">, "type" | "required"> & {
   children?: ReactNode;
   // エラーメッセージ（チェックボックスではこちらを使う）
   error?: ReactNode;
-  label: string;
+  // 省略時（空文字含む）はラベルを表示しない（必要なら aria-label を渡す）
+  label?: string;
   type?: InputType;
   placeholder?: string;
   isRequired?: boolean;
   name?: string;
-  value?: string;
+  value?: string | number;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   // 親でフォーカス状態を管理する場合に渡す（省略時は CSS の :focus で表示）
   isFocused?: boolean;
+  // 外枠の幅などを指定する（省略時は w-full max-w-sm）
+  className?: string;
 };
 
 function InputField({
@@ -56,6 +59,7 @@ function InputField({
   value,
   onChange,
   isFocused,
+  className = "w-full max-w-sm",
   ...rest
 }: Props) {
   const id = useId();
@@ -80,10 +84,38 @@ function InputField({
   const renderError = (message: ReactNode) =>
     message && <p className="text-xs text-red-400">{message}</p>;
 
+  // スライダー（価格の上限など）はラベルの下にトラックだけを表示する
+  if (type === "range") {
+    return (
+      <div className={`flex flex-col gap-2 ${className}`}>
+        {label && (
+          <label
+            htmlFor={id}
+            className="flex items-center gap-2 text-sm font-medium text-zinc-300 tabular-nums"
+          >
+            {label}
+            {requiredBadge}
+          </label>
+        )}
+        <input
+          id={id}
+          type="range"
+          name={name}
+          required={isRequired}
+          {...rest}
+          value={value}
+          onChange={onChange}
+          className="h-2 w-full cursor-pointer accent-violet-500 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-500"
+        />
+        {renderError(error ?? children)}
+      </div>
+    );
+  }
+
   // チェックボックス（利用規約の同意など）は本文と同意欄を一体の枠で表示する
   if (type === "checkbox") {
     return (
-      <div className="flex w-full max-w-sm flex-col gap-1.5">
+      <div className={`flex flex-col gap-1.5 ${className}`}>
         <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/60 text-left">
           {children && (
             <div className="max-h-32 overflow-y-auto border-b border-zinc-800 p-4 text-xs leading-relaxed text-zinc-400">
@@ -103,10 +135,12 @@ function InputField({
               onChange={onChange}
               className="h-4 w-4 shrink-0 cursor-pointer accent-violet-500"
             />
-            <span className="flex flex-1 items-center gap-2">
-              {label}
-              {requiredBadge}
-            </span>
+            {label && (
+              <span className="flex flex-1 items-center gap-2">
+                {label}
+                {requiredBadge}
+              </span>
+            )}
           </label>
         </div>
         {renderError(error)}
@@ -115,14 +149,16 @@ function InputField({
   }
 
   return (
-    <div className="flex w-full max-w-sm flex-col gap-1.5">
-      <label
-        htmlFor={id}
-        className="flex items-center gap-2 text-sm font-medium text-zinc-300"
-      >
-        {label}
-        {requiredBadge}
-      </label>
+    <div className={`flex flex-col gap-1.5 ${className}`}>
+      {label && (
+        <label
+          htmlFor={id}
+          className="flex items-center gap-2 text-sm font-medium text-zinc-300"
+        >
+          {label}
+          {requiredBadge}
+        </label>
+      )}
       <div className="relative">
         <input
           id={id}
