@@ -168,7 +168,7 @@ function InputField({
           {...rest}
           value={value}
           onChange={onChange}
-          className={`w-full rounded-lg border bg-zinc-900 px-5 py-2 text-sm text-zinc-100 transition-colors placeholder:text-zinc-500 focus:outline-none ${
+          className={`w-full rounded-lg border bg-zinc-900 px-5 py-2 text-sm text-zinc-100 transition-colors placeholder:text-zinc-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40 ${
             isPassword ? "pr-11" : ""
           } ${borderClass}`}
         />
