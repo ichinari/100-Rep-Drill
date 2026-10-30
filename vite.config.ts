@@ -16,6 +16,7 @@ export default defineConfig({
       '@pages': src('pages'),
       '@problems': src('problems'),
       '@routes': src('routes'),
+      '@hooks': src('hooks'),
     },
   },
 })

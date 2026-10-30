@@ -24,7 +24,8 @@
       "@pages/*": ["./src/pages/*"],
       "@problems": ["./src/problems"],
       "@problems/*": ["./src/problems/*"],
-      "@routes/*": ["./src/routes/*"]
+      "@routes/*": ["./src/routes/*"],
+      "@hooks/*": ["./src/hooks/*"]
     },
 
     /* Linting */
